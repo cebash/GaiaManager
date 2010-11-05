@@ -26,7 +26,7 @@ const char *const text_delfailed[] = {
 const char *const text_nosplit[] = {
 	"You cannot launch split games",
 	"You cannot launch split games",
-	"Vous ne pouvez pas jouer à des jeux Couper",
+	"Vous ne pouvez pas jouer à des jeux coupés",
 	"No puedes jugar a juegos divididos",
 	"Aufgeteilte Spiele koennen nicht gestartet werden",
 	"Non puoi avviare giochi divisi",
@@ -218,7 +218,7 @@ const char *const text_toinstall[] = {
 const char *const text_cover_msg[] = {
 	"Do you want to download missing covers (in /dev_hdd0/" COVERS_DIR ")?\nIt could takes awhile...\nPlease wait",
 	"Do you want to download missing covers (in /dev_hdd0/" COVERS_DIR ")?\nIt could takes awhile...\nPlease wait",
-	"Vous-voulez telecharger les jaquettes manquantes(dans /dev_hdd0/" COVERS_DIR")?\nCela peut prendre un certain temps...\nVeuillez-Patientez",
+	"Vous-voulez telecharger les jaquettes manquantes (dans /dev_hdd0/" COVERS_DIR")?\nCela peut prendre un certain temps...\nVeuillez patientez",
 	"Do you want to download missing covers (in /dev_hdd0/" COVERS_DIR ")?\nIt could takes awhile...\nPlease wait",
 	"Do you want to download missing covers (in /dev_hdd0/" COVERS_DIR ")?\nIt could takes awhile...\nPlease wait",
 	"Vuoi scaricare le cover mancanti (in /dev_hdd0/" COVERS_DIR ")?\nPotrebbe volerci un po'...\nAttendere prego",
@@ -237,7 +237,7 @@ const char *const text_cover_msg[] = {
 const char *const text_fix_permission[] = {
 	"Do you want to try fixing permissions?",
 	"Do you want to try fixing permissions?",
-	"Do you want to try fixing permissions?",
+	"Voulez-vous essayer de corriger les permissions ?",
 	"Do you want to try fixing permissions?",
 	"Do you want to try fixing permissions?",
 	"Vuoi cercare di aggiustare i permessi?",
@@ -277,7 +277,7 @@ const char *const text_launch[] = {
 const char *const text_download[] = {
 	"Download Covers",
 	"Download Covers",
-	"Telechar Jaquettes",
+	"Telecharger Jaquettes",
 	"Download Covers",
 	"Covers herunterladen",
 	"Scarica Cover",
@@ -391,7 +391,7 @@ const char *const text_discless[] = {
 const char *const text_mempatch[] = { 
 	"Mem Patch",
 	"Mem Patch",
-	"Mem Patch",
+	"Patch memoire",
 	"Mem Patch",
 	"Mem Patch",
 	"Mem Patch",
@@ -410,7 +410,7 @@ const char *const text_mempatch[] = {
 const char *const text_directboot[] = {
 	"Direct Boot",
 	"Direct Boot",
-	"Direct Boot",
+	"Démarrage direct",
 	"Direct Boot",
 	"Direkt Boot",
 	"Boot Diretto",
@@ -429,7 +429,7 @@ const char *const text_directboot[] = {
 const char *const text_ftpserver[] = {
 	"FTP Server",
 	"FTP Server",
-	"FTP Serveur",
+	"Serveur FTP",
 	"FTP Server",
 	"FTP Server",
 	"FTP Server",

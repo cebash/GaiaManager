@@ -1,9 +1,10 @@
 
-#include "Sound.h"
+#include "sound.h"
 
 extern "C" {
 #include "at3plus.h"
 }
+#include <cell/sysmodule.h>
 
 using namespace std;
 
@@ -15,6 +16,21 @@ void playSampleThread( std::uint64_t __attribute__ ((unused)))
 {
     Sound::playCurrent();
 }
+
+
+int Sound::init(void)
+{
+	return cellSysmoduleLoadModule(CELL_SYSMODULE_ATRAC3PLUS);
+
+}
+
+
+void Sound::free(void)
+{
+	cellSysmoduleUnloadModule(CELL_SYSMODULE_ATRAC3PLUS);
+
+}
+
 
 Sound::Sound(const string & i_sPath)
 {

@@ -23,6 +23,9 @@ public:
     void play();
 
     static void playCurrent();
+
+	static int init(void);
+	static void free(void);
 };
 
 #endif

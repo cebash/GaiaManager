@@ -1,6 +1,6 @@
 
 #include <sys/spu_initialize.h>
-#include <sys/ppu_thread.h>
+//#include <sys/ppu_thread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -361,7 +361,7 @@ static int load_modules(void)
 		unload_mod |= 32;
 
 #ifndef WITHOUT_SOUND
-	ret = cellSysmoduleLoadModule(CELL_SYSMODULE_ATRAC3PLUS);
+	ret = Sound::init();
 	if (ret != CELL_OK)
 		return ret;
 	else
@@ -400,7 +400,7 @@ static int unload_modules(void)
 
 #ifndef WITHOUT_SOUND
 	if (unload_mod & 64)
-		cellSysmoduleUnloadModule(CELL_SYSMODULE_ATRAC3PLUS);
+		Sound::free();
 #endif
 
 	if (unload_mod & 32)

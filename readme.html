@@ -57,9 +57,23 @@
 
 <p>after the first clone (and when I update a submodule).</p>
 
-<p>You can change the games directory compiling with</p>
+<p>You can change the games directory (BDRIPS by default) compiling with</p>
 
 <pre><code>	make WITH_GAMES_DIR=XXX</code></pre>
+
+<p>You can change the covers directory (BDCOVERS by default) compiling with</p>
+
+<pre><code>	make WITH_COVERS_DIR=XXX</code></pre>
+
+<p>You can disable the status saves (enabled by default) by compiling with</p>
+
+<pre><code>	make WITHOUT_SAVE_STATUS=1</code></pre>
+
+<p>At last, you can disable the (ugly) sound (enabled by default) by compiling with</p>
+
+<pre><code>	make WITH_SOUND=1</code></pre>
+
+<p>All this option can be changed int the <em>option.mk</em> file.</p>
 
 <h2 id='v10_changelog'>v1.0 ChangeLog</h2>
 

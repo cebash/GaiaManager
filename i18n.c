@@ -410,7 +410,7 @@ const char *const text_mempatch[] = {
 const char *const text_directboot[] = {
 	"Direct Boot",
 	"Direct Boot",
-	"Démarrage direct",
+	"Demar. direct",
 	"Direct Boot",
 	"Direkt Boot",
 	"Boot Diretto",

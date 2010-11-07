@@ -647,16 +647,16 @@ void draw_device_list(u32 flags, int hermes, int payload_type, int direct_boot, 
 		cellDbgFontPrintf(0.775, 0.635, 0.8, 0xffffffff, text_check[region]);
 		cellDbgFontPrintf(0.775, 0.68, 0.8, 0xffffffff,
 						  payload_type == 1 ? text_discless[region] : text_mempatch[region]);
-		draw_text_bool(0.895, 0.68, 0.8, hermes);
+		draw_text_bool(0.925, 0.68, 0.8, hermes);
 		cellDbgFontPrintf(0.775, 0.72, 0.8, 0xffffffff, text_directboot[region]);
-		draw_text_bool(0.895, 0.72, 0.8, direct_boot);
+		draw_text_bool(0.925, 0.72, 0.8, direct_boot);
 	} else {
 		cellDbgFontPrintf(0.775, 0.472, 0.8, 0xffffffff, text_delete[region]);
 		cellDbgFontPrintf(0.775, 0.515, 0.8, 0xffffffff, text_refresh[region]);
 	}
 
 	cellDbgFontPrintf(0.775, 0.76, 0.8, 0xffffffff, text_ftpserver[region]);
-	draw_text_bool(0.895, 0.76, 0.8, ftp);
+	draw_text_bool(0.925, 0.76, 0.8, ftp);
 	cellDbgFontPrintf(0.775, 0.80, 0.8, 0xffffffff, text_ommode[region]);
 	cellDbgFontPrintf(0.86, 0.80, 0.8, 0xffffffff, (flags >> 31) & 1 ? text_homebrew[region] : text_game[region]);
 	cellDbgFontPrintf(0.775, 0.84, 0.8, 0xffffffff, "IP");

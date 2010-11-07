@@ -1,3 +1,6 @@
+#ifndef _I18N_H
+#define _I18N_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,6 +38,8 @@ extern const char *const text_game[];
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 /* vim: set ts=4 sw=4 sts=4 tw=120 */

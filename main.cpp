@@ -51,7 +51,9 @@
 #include "parse.h"
 #include "syscall8.h"
 #ifndef WITHOUT_SOUND
+extern "C" {
 #include "at3plus.h"
+}
 #endif
 
 #define MAX_LIST 512

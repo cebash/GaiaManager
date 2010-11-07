@@ -38,9 +38,24 @@ I use **git submodules**, so you need to do
 
 after the first clone (and when I update a submodule).
 
-You can change the games directory compiling with
+
+You can change the games directory (BDRIPS by default) compiling with
 
 		make WITH_GAMES_DIR=XXX
+
+You can change the covers  directory (BDCOVERS by default) compiling with
+
+		make WITH_COVERS_DIR=XXX
+
+You can disable the status saves (enabled by default) by compiling with 
+
+		make WITHOUT_SAVE_STATUS=1
+
+At last, you can disable the (ugly) sound (enabled by default) by compiling with
+
+		make WITH_SOUND=1
+
+All this option can be changed int the _option.mk_ file.
 
 v1.0 ChangeLog
 --------------

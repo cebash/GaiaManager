@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int region;
 
 extern const char *const text_delfailed[];
@@ -27,5 +31,10 @@ extern const char *const text_ftpserver[];
 extern const char *const text_ommode[];
 extern const char *const text_homebrew[];
 extern const char *const text_game[];
+
+
+#ifdef __cplusplus
+}
+#endif
 
 /* vim: set ts=4 sw=4 sts=4 tw=120 */

@@ -50,11 +50,9 @@
 #include "graphics.h"
 #include "parse.h"
 #include "syscall8.h"
-#ifndef WITHOUT_SOUND
-extern "C" {
-#include "at3plus.h"
-}
-#endif
+
+// C++ Modules
+#include "sound.h"
 
 #define MAX_LIST 512
 
@@ -64,12 +62,6 @@ enum BmModes {
 	GAME = 0,
 	HOMEBREW = 1
 };
-
-#ifndef WITHOUT_SOUND
-static int fm = -1;
-static char soundfile[512];
-static sys_ppu_thread_t soundThread = 0;
-#endif
 
 static char hdd_folder[64] = "ASDFGHJKLMN";	// folder for games (deafult string is changed the first time it is loaded
 static char hdd_folder_home[64] = FOLDER_NAME;	// folder for homebrew
@@ -125,9 +117,6 @@ static int unload_modules(void);
 static void *png_malloc(u32 size, void *a);
 static int png_free(void *ptr, void *a);
 static int png_out_mapmem(u8 * buffer, size_t buf_size);
-#ifndef WITHOUT_SOUND
-static void playBootSound(uint64_t ui __attribute__ ((unused)));
-#endif
 static int load_png_texture(u8 * data, char *name);
 static uint32_t syscall35(const char *srcpath, const char *dstpath);
 void syscall36(const char *path);	// for some strange reasons it does not work as static
@@ -487,28 +476,6 @@ static int png_out_mapmem(u8 * buffer, size_t buf_size)
 	return 0;
 
 }
-
-#ifndef WITHOUT_SOUND
-static void playBootSound(uint64_t ui __attribute__ ((unused)))
-{
-	int32_t status;
-	BGMArg bgmArg;
-
-//      stop_atrac3();
-
-//      delete_atrac3plus(&bgmArg);
-
-	cellFsClose(fm);
-//      status = cellFsOpen("/dev_hdd0/game/OMAN46756/USRDIR/BOOT.AT3", CELL_FS_O_RDONLY, &fm, NULL, 0);
-	status = cellFsOpen(soundfile, CELL_FS_O_RDONLY, &fm, NULL, 0);
-	bgmArg.fd = fm;
-	status = init_atrac3plus(&bgmArg);
-	play_atrac3plus((uintptr_t) & bgmArg);
-	cellFsClose(fm);
-	sys_ppu_thread_exit(0);
-
-}
-#endif
 
 static int load_png_texture(u8 * data, char *name)
 {
@@ -1174,6 +1141,8 @@ static void copy_from_bluray(void)
 	}
 }
 
+using namespace std;
+
 /****************************************************/
 /* MAIN                                             */
 /****************************************************/
@@ -1197,8 +1166,9 @@ int main(int argc, char *argv[])
 	chmod(argv[0], 00666);
 
 #ifndef WITHOUT_SOUND
-	sprintf(soundfile, "/dev_hdd0/game/%s/USRDIR/BOOT.AT3", hdd_folder_home);
-	sys_ppu_thread_create(&soundThread, playBootSound, NULL, 100, 0x8000, 0, (char *) "sound thread");
+	string sSoundFile = string("/dev_hdd0/game/") + string(hdd_folder_home) + string("/USRDIR/BOOT.AT3");
+	Sound sound( sSoundFile);
+	sound.play();
 #endif
 
 	//fix_perm_recursive("/dev_hdd0/game/OMAN46756/cache2/");

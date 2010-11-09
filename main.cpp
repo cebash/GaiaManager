@@ -1,6 +1,5 @@
 
 #include <sys/spu_initialize.h>
-//#include <sys/ppu_thread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -23,7 +22,6 @@
 #include <sys/syscall.h>
 
 #include <cell/gcm.h>
-#include <cell/pad/libpad.h>
 #include <cell/keyboard.h>
 #include <cell/sysmodule.h>
 #include <cell/dbgfont.h>
@@ -33,7 +31,6 @@
 #include <sysutil/sysutil_sysparam.h>
 #include <sysutil/sysutil_msgdialog.h>
 #include <cell/font.h>
-#include <sys/ppu_thread.h>
 
 #include <netex/net.h>
 #include <netex/libnetctl.h>
@@ -53,6 +50,7 @@
 
 // C++ Modules
 #include "sound.h"
+#include "input_pad.h"
 
 #define MAX_LIST 512
 
@@ -85,13 +83,9 @@ static enum BmModes mode_list = GAME;
 
 static int game_sel = 0;
 
-static unsigned cmd_pad = 0;
-
 static void *host_addr;
 
 static int up_count = 0, down_count = 0, left_count = 0, right_count = 0;
-
-u32 new_pad = 0, old_pad = 0;
 
 static int counter_png = 0;
 static int old_fi = -1;
@@ -154,81 +148,6 @@ static int load_libfont_module(void)
 		cellSysmoduleUnloadModule(CELL_SYSMODULE_FONT);
 	}
 	return ret;					// Error end
-}
-
-int pad_read(void)
-{
-	int ret;
-
-	u32 padd;
-
-	CellPadData databuf;
-#if (CELL_SDK_VERSION<=0x210001)
-	CellPadInfo infobuf;
-#else
-	CellPadInfo2 infobuf;
-#endif
-	static u32 old_info = 0;
-
-	cmd_pad = 0;
-
-#if (CELL_SDK_VERSION<=0x210001)
-	ret = cellPadGetInfo(&infobuf);
-#else
-	ret = cellPadGetInfo2(&infobuf);
-#endif
-	if (ret != 0) {
-		old_pad = new_pad = 0;
-		return 1;
-	}
-#if (CELL_SDK_VERSION<=0x210001)
-	if (infobuf.status[0] == CELL_PAD_STATUS_DISCONNECTED) {
-#else
-	if (infobuf.port_status[0] == CELL_PAD_STATUS_DISCONNECTED) {
-#endif
-		old_pad = new_pad = 0;
-		return 1;
-	}
-#if (CELL_SDK_VERSION<=0x210001)
-	if ((infobuf.info & CELL_PAD_INFO_INTERCEPTED)
-		&& (!(old_info & CELL_PAD_INFO_INTERCEPTED))) {
-		old_info = infobuf.info;
-	} else if ((!(infobuf.info & CELL_PAD_INFO_INTERCEPTED))
-			   && (old_info & CELL_PAD_INFO_INTERCEPTED)) {
-		old_info = infobuf.info;
-		old_pad = new_pad = 0;
-		return 1;
-	}
-#else
-	if ((infobuf.system_info & CELL_PAD_INFO_INTERCEPTED)
-		&& (!(old_info & CELL_PAD_INFO_INTERCEPTED))) {
-		old_info = infobuf.system_info;
-	} else if ((!(infobuf.system_info & CELL_PAD_INFO_INTERCEPTED))
-			   && (old_info & CELL_PAD_INFO_INTERCEPTED)) {
-		old_info = infobuf.system_info;
-		old_pad = new_pad = 0;
-		return 1;
-	}
-#endif
-
-	ret = cellPadGetData(0, &databuf);
-
-	if (ret != CELL_OK) {
-		old_pad = new_pad = 0;
-		return 1;
-	}
-
-	if (databuf.len == 0) {
-		new_pad = 0;
-		return 1;
-	}
-
-	padd = (databuf.button[2] | (databuf.button[3] << 8));
-
-	new_pad = padd & (~old_pad);
-	old_pad = padd;
-
-	return 1;
 }
 
 /****************************************************/
@@ -340,7 +259,7 @@ static int load_modules(void)
 	if (setRenderObject())
 		return -1;
 
-	ret = cellPadInit(1);
+	ret = InputPad::init();
 	if (ret != 0)
 		return ret;
 
@@ -392,7 +311,7 @@ static int unload_modules(void)
 
 	ftp_off();
 
-	cellPadEnd();
+	InputPad::free();
 
 	termFont();
 
@@ -976,6 +895,8 @@ static void copy_from_bluray(void)
 
 	int n;
 
+	InputPad * pclIPad = InputPad::getSingle();
+
 	for (n = 0; n < 11; n++) {
 		dialog_ret = 0;
 
@@ -1031,7 +952,7 @@ static void copy_from_bluray(void)
 			abort_copy = 0;
 			initConsole();
 			file_counter = 0;
-			new_pad = 0;
+			pclIPad->clearPressed();
 
 			if (curr_device != 0)
 				copy_mode = 1;	// break files >= 4GB
@@ -1094,9 +1015,9 @@ static void copy_from_bluray(void)
 
 				flip();
 
-				pad_read();
-				if (new_pad & BUTTON_CROSS) {
-					new_pad = 0;
+				pclIPad->read();
+				if (pclIPad->getPressed() & BUTTON_CROSS) {
+					pclIPad->clearPressed();
 					break;
 				}
 
@@ -1150,9 +1071,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	sys_spu_initialize(2, 0);
-	//BGMArg bgmArg;
 	int ret;
-	//int    fm = -1;
 	int one_time = 1;
 
 	u8 *text_bmp = NULL;
@@ -1256,8 +1175,9 @@ int main(int argc, char *argv[])
 	restorecall36((char *) "/app_home");
 	restorecall36((char *) "/dev_bdvd");	// select bluray
 
+	InputPad * pclIPad = InputPad::getSingle();
 	/* main loop */
-	while ((pad_read() != 0) || want_to_quit) {
+	while ((pclIPad->read() != 0) || want_to_quit) {
 		if (want_to_quit)
 			quit();
 
@@ -1389,7 +1309,7 @@ int main(int argc, char *argv[])
 				counter_png--;
 		}
 
-		if (old_pad & BUTTON_UP) {
+		if (pclIPad->getReleased() & BUTTON_UP) {
 			if (up_count > 7) {
 				up_count = 0;
 				game_sel--;
@@ -1402,7 +1322,7 @@ int main(int argc, char *argv[])
 		} else
 			up_count = 8;
 
-		if (old_pad & BUTTON_LEFT) {
+		if (pclIPad->getReleased() & BUTTON_LEFT) {
 			if (left_count > 7) {
 				left_count = 0;
 				if (game_sel == 0) {
@@ -1418,7 +1338,7 @@ int main(int argc, char *argv[])
 		} else
 			left_count = 8;
 
-		if (old_pad & BUTTON_DOWN) {
+		if (pclIPad->getReleased() & BUTTON_DOWN) {
 			if (down_count > 7) {
 				down_count = 0;
 				game_sel++;
@@ -1429,11 +1349,11 @@ int main(int argc, char *argv[])
 
 		} else
 			down_count = 8;
-		if (old_pad & BUTTON_L3) {
+		if (pclIPad->getReleased() & BUTTON_L3) {
 			reset_game_list(1, 0);
 		}
 
-		if (old_pad & BUTTON_RIGHT) {
+		if (pclIPad->getReleased() & BUTTON_RIGHT) {
 
 			if (right_count > 7) {
 				right_count = 0;
@@ -1453,10 +1373,11 @@ int main(int argc, char *argv[])
 
 		// update the game folder
 
-		if ((new_pad & BUTTON_START) && (old_pad & BUTTON_SELECT))
+		if ((pclIPad->getPressed() & BUTTON_START) 
+				&& (pclIPad->getReleased() & BUTTON_SELECT))
 			update_game_folder(argv[0]);
 
-		if (new_pad & BUTTON_R2) {
+		if (pclIPad->getPressed() & BUTTON_R2) {
 			game_sel = 0;
 			if (mode_list == GAME) {
 				mode_list = HOMEBREW;
@@ -1472,7 +1393,7 @@ int main(int argc, char *argv[])
 			load_png_texture(text_bg, filename);
 		}
 
-		if ((new_pad & BUTTON_R3) && game_sel >= 0 && max_menu_list > 0 && mode_list == GAME) {
+		if ((pclIPad->getPressed() & BUTTON_R3) && game_sel >= 0 && max_menu_list > 0 && mode_list == GAME) {
 
 			time_start = time(NULL);
 
@@ -1481,7 +1402,7 @@ int main(int argc, char *argv[])
 			initConsole();
 
 			file_counter = 0;
-			new_pad = 0;
+			pclIPad->clearPressed();
 
 			global_device_bytes = 0;
 
@@ -1522,9 +1443,9 @@ int main(int argc, char *argv[])
 
 				flip();
 
-				pad_read();
-				if (new_pad & BUTTON_CROSS) {
-					new_pad = 0;
+				pclIPad->read();
+				if (pclIPad->getPressed() & BUTTON_CROSS) {
+					pclIPad->clearPressed();
 					break;
 				}
 
@@ -1534,7 +1455,7 @@ int main(int argc, char *argv[])
 		}
 // delete from devices  
 
-		if ((new_pad & BUTTON_TRIANGLE) && game_sel >= 0 && *max_list > 0
+		if ((pclIPad->getPressed() & BUTTON_TRIANGLE) && game_sel >= 0 && *max_list > 0
 			&& ((mode_list == GAME && (!(menu_list[game_sel].flags & 2048)))
 				|| mode_list == HOMEBREW)) {
 			int n;
@@ -1561,7 +1482,7 @@ int main(int argc, char *argv[])
 				abort_copy = 0;
 				initConsole();
 				file_counter = 0;
-				new_pad = 0;
+				pclIPad->clearPressed();
 
 				DPrintf("Starting... \n delete %s\n\n", menu_tmp_list[game_sel].path);
 
@@ -1602,9 +1523,9 @@ int main(int argc, char *argv[])
 
 					flip();
 
-					pad_read();
-					if (new_pad & BUTTON_CROSS) {
-						new_pad = 0;
+					pclIPad->read();
+					if (pclIPad->getPressed() & BUTTON_CROSS) {
+						pclIPad->clearPressed();
 						break;
 					}
 
@@ -1614,7 +1535,7 @@ int main(int argc, char *argv[])
 		}
 // copy from devices
 
-		if ((new_pad & BUTTON_CIRCLE) && game_sel >= 0 && max_menu_list > 0 && mode_list == GAME) {
+		if ((pclIPad->getPressed() & BUTTON_CIRCLE) && game_sel >= 0 && max_menu_list > 0 && mode_list == GAME) {
 			if (menu_list[game_sel].flags & 2048) {
 				copy_from_bluray();
 				continue;
@@ -1707,7 +1628,7 @@ int main(int argc, char *argv[])
 				abort_copy = 0;
 				initConsole();
 				file_counter = 0;
-				new_pad = 0;
+				pclIPad->clearPressed();
 
 				DPrintf("Starting... \n copy %s\n to %s\n\n", menu_list[game_sel].path, name);
 
@@ -1789,9 +1710,9 @@ int main(int argc, char *argv[])
 
 					flip();
 
-					pad_read();
-					if (new_pad & BUTTON_CROSS) {
-						new_pad = 0;
+					pclIPad->read();
+					if (pclIPad->getPressed() & BUTTON_CROSS) {
+						pclIPad->clearPressed();
 						break;
 					}
 
@@ -1850,7 +1771,7 @@ int main(int argc, char *argv[])
 		}
 // copy from bluray
 
-		if ((new_pad & BUTTON_SQUARE) && mode_list == GAME) {
+		if ((pclIPad->getPressed() & BUTTON_SQUARE) && mode_list == GAME) {
 			dialog_ret = 0;
 			ret =
 				cellMsgDialogOpen2(type_dialog_yes_no, text_cover_msg[region], dialog_fun1, (void *) 0x0000aaaa, NULL);
@@ -1872,23 +1793,23 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
-		if ((new_pad & BUTTON_L1) && mode_list == GAME) {
+		if ((pclIPad->getPressed() & BUTTON_L1) && mode_list == GAME) {
 			if (payload_type == 0) {
 				patchmode = patchmode == 2 ? 0 : 2;	// toggle patch mode
 			} else if (payload_type == 1) {
 				disc_less ^= true;
 			}
 		}
-		if ((new_pad & BUTTON_L2) && mode_list == GAME) {
+		if ((pclIPad->getPressed() & BUTTON_L2) && mode_list == GAME) {
 			direct_boot ^= true;
 		}
-		if (new_pad & BUTTON_R1) {
+		if (pclIPad->getPressed() & BUTTON_R1) {
 			if (ftp_flags & 2)
 				ftp_off();
 			else
 				ftp_on();
 		}
-		if (new_pad & BUTTON_CROSS && game_sel >= 0 && *max_list > 0) {
+		if (pclIPad->getPressed() & BUTTON_CROSS && game_sel >= 0 && *max_list > 0) {
 
 			if (mode_list == GAME && (menu_list[game_sel].flags & 2048)) {
 				flip();

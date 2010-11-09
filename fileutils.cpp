@@ -4,10 +4,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <cell/cell_fs.h>
+#include <cell/gcm.h>
+#include <cell/dbgfont.h>
 
 #include "fileutils.h"
 #include "graphics.h"
 #include "main.h"
+
+// TODO remove this dependency
+#include "input_pad.h"
 
 /****************************************************/
 /* FILE UTILS                                       */
@@ -588,8 +593,10 @@ static int fast_copy_process()
 
 		flip();
 
-		pad_read();
-		if (new_pad & BUTTON_TRIANGLE) {
+		InputPad::getSingle()->read();
+		if (InputPad::getSingle()->getPressed() & BUTTON_TRIANGLE) {
+		/*pad_read();
+		if (new_pad & BUTTON_TRIANGLE) {*/
 			abort_copy = 1;
 			DPrintf("Aborted by user \n");
 			error = -666;
@@ -870,12 +877,14 @@ int my_game_test(char *path)
 
 			flip();
 
-			pad_read();
+			InputPad::getSingle()->read();
+			//pad_read();
 
 			if (abort_copy)
 				break;
 
-			if (new_pad & BUTTON_TRIANGLE) {
+			if (InputPad::getSingle()->getPressed() & BUTTON_TRIANGLE) {
+			//if (new_pad & BUTTON_TRIANGLE) {
 				abort_copy = 1;
 			}
 
@@ -980,12 +989,14 @@ int my_game_delete(char *path)
 
 		flip();
 
-		pad_read();
+		InputPad::getSingle()->read();
+		//pad_read();
 
 		if (abort_copy)
 			break;
 
-		if (new_pad & BUTTON_TRIANGLE) {
+		if (InputPad::getSingle()->getPressed() & BUTTON_TRIANGLE) {
+		//if (new_pad & BUTTON_TRIANGLE) {
 			abort_copy = 1;
 		}
 

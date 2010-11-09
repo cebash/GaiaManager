@@ -1,6 +1,8 @@
 /* Functions to manage dialogs */
 
 #include <sysutil/sysutil_msgdialog.h>
+#include <cell/gcm.h>
+//#include <cell/dbgfont.h>
 #include "dialog.h"
 #include "graphics.h"
 

@@ -5,12 +5,10 @@
 extern "C" {
 #endif
 
-#include <cell/gcm.h>
-#include <cell/dbgfont.h>
+//#include <cell/gcm.h>
+//#include <cell/dbgfont.h>
 
-typedef unsigned int u32;
-typedef unsigned short u16;
-typedef unsigned char u8;
+#include "types.h"
 
 #define CONSOLE_WIDTH		(76+16)
 #define CONSOLE_HEIGHT		(31)

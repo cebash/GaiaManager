@@ -13,6 +13,7 @@
 #include "graphics.h"
 #include <cell/cell_fs.h>
 #include <netex/libnetctl.h>
+#include <cell/dbgfont.h>
 
 CellDbgFontConsoleId consoleID = CELL_DBGFONT_STDOUT_ID;
 

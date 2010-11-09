@@ -3,7 +3,7 @@ include $(CELL_MK_DIR)/sdk.makedef.mk
 
 include option.mk
 
-PPU_SRCS = main.cpp dialog.c fileutils.c graphics.c i18n.c network.c parse.c syscall8.c version.c sound.cpp 
+PPU_SRCS = main.cpp input_pad.cpp dialog.c fileutils.cpp graphics.c i18n.c network.c parse.c syscall8.c version.c sound.cpp 
 PPU_TARGET = open_manager.elf
 
 GITHEAD := $(shell git describe --abbrev=4 --tags 2>/dev/null)
